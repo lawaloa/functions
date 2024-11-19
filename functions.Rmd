@@ -1,0 +1,825 @@
+---
+title: 'Lesson Notes: Intro to Functions and Conditionals'
+author:
+  - name: "Kene David Nwosu"
+  - name: "Daniel Camara"
+  - name: "Eduardo Araujo"
+  - name: "Laure Vancauwenberghe"
+  - name: "Ayodele Omotola Lawal"
+date: "2024-11-19"
+output:
+  html_document:
+    code_folding: "show"
+    code_download: true
+    number_sections: true
+    toc: true
+    css: !expr here::here("global/style/style.css")
+    highlight: kate
+  word_document:
+    toc: true
+editor_options:
+  markdown:
+    wrap: 100
+  canonical: true
+  chunk_output_type: console
+---
+
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+# Load packages
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, knitr, here, NHSRdatasets, janitor, medicaldata, reactable)
+
+# Source functions
+source(here("global/functions/misc_functions.R"))
+
+# knitr settings
+knitr::opts_chunk$set(warning = F, message = F, class.source = "tgc-code-block", error = T)
+```
+
+# Intro
+
+The two main components of the R language are objects and functions. Objects are the data structures that we use to store information, and functions are the tools that we use to manipulate these objects. Paraphrasing [John Chambers](https://statweb.stanford.edu/~jmc4/vitae.html), one of the originators of the R language, everything that "exists" in R is an object, and everything that "happens" is a function.
+
+So far you have mostly used functions written by others. In this lesson, you will learn how to write your own functions.
+
+Writing functions allows you to automate repetitive tasks, improve efficiency and reduce errors in your code.
+
+In this lesson, we will learn the fundamentals of functions with simple examples. Then in a future lesson, we will write more complex functions that can automate large parts of your data analysis workflow.
+
+# Learning objectives
+
+By the end of this lesson, you will be able to:
+
+1.  Create and use your own functions in R.
+2.  Design function arguments and set default values.
+3.  Use conditional logic like `if`, `else if`, and `else` within functions.
+4.  Check and validate function arguments to prevent errors.
+5.  Manage function scope and understand local vs. global variables.
+6.  Handle vectorized data in functions.
+7.  Organize and store your custom functions for easy reuse.
+
+# Packages
+
+Run the following code to install and load the packages needed for this lesson:
+
+```{r}
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, here, NHSRdatasets, medicaldata, outbreaks, reactable)
+```
+
+## Packages
+
+‣ Install and load necessary packages for this lesson.
+
+```{r}
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, here, NHSRdatasets, medicaldata, outbreaks, reactable)
+```
+
+## Basics of a Function
+
+‣ Learn to create a simple function: **Converting pounds to kilograms**
+
+‣ Define a function named `pounds_to_kg`, by multiplying the input by 0.4536:
+
+```{r}
+pounds_to_kg <- function(pounds){
+  kg <- pounds * 0.4536
+  return(kg)
+}
+```
+
+‣ New object in environment of type function.
+
+‣ Use `pounds_to_kg` to convert a value:
+
+```{r}
+pounds_to_kg(200)
+```
+
+‣ Breaking down function structure:
+
+```{r}
+# Slowly build up the function
+pounds_to_kg <- function(pounds){
+  kg <- pounds * 0.4536
+  return(kg)
+}
+```
+
+‣ **Function creation**: Use `function`, followed by parentheses and braces.
+
+‣ **Arguments**: Define inside parentheses. Example: `pounds`. But can be any name.
+
+‣ **Body**: Code to execute inside braces.
+
+‣ **Returning values**: Use `return` to specify what to return.
+
+‣ **Naming the function**: Store in an object, e.g., `pounds_to_kg`.
+
+‣ We can use the function with named and unnamed arguments:
+
+```{r}
+pounds_to_kg(pounds = 200)
+pounds_to_kg(100)
+```
+
+‣ And we can apply function to a vector:
+
+```{r}
+pounds_vec <- c(100, 200, 300)
+pounds_to_kg(pounds_vec)
+```
+
+‣ To explore the function's source code, type the function's name without parentheses:
+
+```{r}
+pounds_to_kg
+```
+
+‣ Or view the function in RStudio with `View`:
+
+```{r eval = F}
+View(pounds_to_kg)  # View the pounds_to_kg function
+View(reactable)  # View the reactable function
+```
+
+::: practice
+### Age Months Function {.unlisted .unnumbered}
+
+*(NOTE: Answers are at the bottom of the page. Try to answer the questions yourself before checking.)*
+
+Create a simple function called `years_to_months` that transforms age in years to age in months.
+
+Try it out with `years_to_months(12)`
+
+```{r eval = F}
+# Your code here
+years_to_months <- function(years){
+  month <- years * 12
+  return(month)
+}
+
+years_to_months(3)
+```
+:::
+
+‣ Let's write a more complex function: Converting Fahrenheit to Celsius.
+
+‣ The formula: $C = \frac{5}{9} \times (F - 32)$
+
+```{r}
+fahrenheit_to_celsius <- function(fahrenheit){
+  celsius <- ((5/9) * (fahrenheit - 32))
+  return(celsius)
+}
+
+fahrenheit_to_celsius(32) # Should be 0
+```
+
+‣ Testing the function on the `airquality` dataset.
+
+```{r}
+airquality |>
+  select(Temp) |> # select the Temp column
+   mutate(Temp_celsius = fahrenheit_to_celsius(Temp)) # apply the function to the Temp column
+```
+
+Great!
+
+## When to Write a Function in R
+
+‣ **Reusability**: Writing functions for repetitive code enhances efficiency.
+
+‣ **Readability**: Descriptive functions clarify code purpose. Though not so obvious with simple functions:
+
+```{r}
+airquality %>%
+  mutate(Temp = fahrenheit_to_celsius(Temp)) 
+
+# VS
+
+airquality %>%
+  mutate(Temp = Temp * 5 / 9 - 32)
+```
+
+‣ **Sharing**: Functions facilitate code sharing, through packages or scripts. We'll talk about sharing options later.
+
+‣ **SIDE-NOTE** Data Frame and Plot functions are among the most useful. For example, this function creates an epidemic curve from a dataset:
+
+```{r}
+# Function to plot an epidemic curve
+plot_epidemic_curve <- function(data, date_column) {
+  data %>%
+    count({{ date_column }}) %>%
+    complete({{ date_column }} := seq(min({{ date_column }}), 
+                                      max({{ date_column }}), by="day")) %>%
+    ggplot(aes(x = {{ date_column }}, y = n)) +
+    geom_col(fill = "#4395D1")
+}
+
+# Example usage
+plot_epidemic_curve(outbreaks::ebola_sierraleone_2014, date_of_sample)
+```
+
+‣ We'll explore such in a future lesson. For now, focusing on vector manipulation functions to give you a solid foundation.
+
+::: practice
+### Celsius to Fahrenheit Function {.unlisted .unnumbered}
+
+Create a function named `celsius_to_fahrenheit` that converts temperature from Celsius to Fahrenheit. Here is the formula for this conversion:
+
+$$ Fahrenheit = Celsius * 1.8 + 32 $$
+
+```{r eval=FALSE}
+# Your code here
+celsius_to_fahrenheit <- function(celsius){
+  fahrenheit <- celsius*1.8+32
+  return(fahrenheit)
+}
+```
+
+Then test your function on the `temp` column of the built-in `beaver1` dataset in R:
+
+```{r eval=FALSE}
+beaver1 %>%
+  select(temp) %>%
+  mutate(temp_fahrenheit = celsius_to_fahrenheit(temp)) %>% 
+  head()
+```
+:::
+
+## Functions with Multiple Arguments
+
+‣ Functions typically have multiple arguments. Let's see a function with three arguments.
+
+‣ `calculate_calories`, to calculate calories from macronutrients.
+
+```{r}
+calculate_calories <- function(carb_grams, protein_grams, fat_grams){
+  result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+  return(result)
+}
+            
+
+calculate_calories(carb_grams = 50, protein_grams = 25, fat_grams = 10)
+```
+
+‣ Without all arguments, the function yields an error.
+
+```{r eval = F}
+calculate_calories(carb_grams = 50, protein_grams = 25)
+```
+
+‣ Default values can be set for function arguments.
+
+```{r}
+calculate_calories <- function(carb_grams, protein_grams, fat_grams) {
+  result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+  return(result)
+}
+
+calculate_calories(50, 25)
+```
+
+‣ We can make **all** arguments optional with default values.
+
+```{r}
+calculate_calories <- function(carb_grams = 0, protein_grams=0, fat_grams = 0) {
+  result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+  return(result)
+}
+```
+
+‣ Now we can call the function with no or some arguments.
+
+```{r}
+calculate_calories()
+
+calculate_calories(carb_grams= 50, protein_grams = 25)
+```
+
+::: practice
+### BMI Function {.unlisted .unnumbered}
+
+Create a function named `calc_bmi` that calculates the Body Mass Index (BMI) for one or more individuals. Keep in mind that BMI is calculated as weight in kg divided by the square of the height in meters. Therefore, this function requires two mandatory arguments: weight and height.
+
+```{r eval=FALSE}
+# Your code here
+calc_bmi <- function(weight=0, height=0){
+  bmi <- weight/((height/100)^2)
+  return(bmi)
+}
+```
+
+Then, apply your function to the `medicaldata::smartpill` dataset to calculate the BMI for each person:
+
+```{r eval=FALSE}
+medicaldata::smartpill |>
+  as_tibble() |>
+  select(Weight, Height) |>
+  mutate(BMI = calc_bmi(Weight, Height))
+```
+:::
+
+## Understanding Scope in R
+
+‣ **Scope** refers to the **visibility of variables** and objects within different parts of your R code.
+
+‣ Objects within a function have **local scope** (as opposed to **global scope**) and are not accessible outside the function.
+
+‣ Imagin we wrote the `pounds_to_kg` function like this:
+
+```{r}
+pounds_to_kg <- function(pounds) {
+  kg <- pounds * 0.4536
+}
+```
+
+‣ May be tempted to try to access the `kg` variable outside of the function, but you'll get an error:
+
+```{r}
+pounds_to_kg(50)
+kg
+```
+
+‣ To use a value generated within a function, it must be **returned** by the function.
+
+```{r}
+pounds_to_kg <- function(pounds) {
+  kg <- pounds * 0.4536
+  return(kg)
+}
+```
+
+‣ Store the function's result in a global variable to access it.
+
+```{r}
+kg <- pounds_to_kg(50)
+  # store the output of pounds_to_kg(50) in a global object, kg
+kg
+```
+
+## Intro to Conditionals: `if`, `else if` and `else`
+
+‣ Conditionals control the flow of code execution, especially useful in functions.
+
+‣ R implements conditionals using `if`, `else`, and `else if` statements.
+
+‣ `if` is used to run code only if a specific condition is true.
+
+‣ Structure of an `if` statement:
+
+```{r eval=FALSE}
+if (condition) {
+  # some code we want to run
+}         # if condition true, run code body
+```
+
+‣ Example: Converting temperature from Celsius to Fahrenheit.
+
+```{r}
+celsius <- 20
+convert_to <- "fahrenheit"
+
+# if convert_to is "fahrenheit", create fahrenheit, as c * 9/5 + 32, then print
+if (convert_to == "fahrenheit"){
+  fahrenheit <- celsius * 9/5 + 32
+  print(fahrenheit)
+}
+
+```
+
+‣ If `convert_to` is `"fahrenheit"`, the code body is executed, and if not, it is skipped.
+
+```{r}
+celsius <- 20
+convert_to <- "kelvin"
+
+# if convert_to is "fahrenheit", create fahrenheit, as c * 9/5 + 32, then print
+if (convert_to == "fahrenheit"){
+  fahrenheit <- celsius * 9/5 + 32
+  print(fahrenheit)
+}
+```
+
+‣ Add an `else` clause to handle the case where `convert_to` is not `"fahrenheit"`.
+
+```{r}
+celsius <- 20
+convert_to <- "kelvin"
+
+# add else clause to print original celsius value
+if (convert_to == "fahrenheit"){
+  fahrenheit <- celsius * 9/5 + 32
+  print(fahrenheit)
+} else {
+  print(celsius)
+}
+```
+
+‣ Use `else if` to check multiple specific conditions.
+
+```{r}
+celsius <- 20
+convert_to <- "kelvin"
+
+if (convert_to == "fahrenheit") {
+  fahrenheit <- (celsius * 9/5) + 32
+  print(fahrenheit)
+} else if (convert_to == "kelvin") {
+  kelvin <- celsius + 273.15
+  print(kelvin)
+} else {
+  print(celsius)
+}
+```
+
+‣ Code handles three scenarios: converting to Fahrenheit, Kelvin, or keeping Celsius.
+
+‣ Can have as many `else if` statements as you need, but can only have one `else` statement attached to an `if` statement.
+
+‣ Finally, we can encapsulate this logic into a function.
+
+```{r}
+celsius_convert <- function(celsius, convert_to){
+  if (convert_to == "fahrenheit"){
+  out <- (celsius * 9/5) + 32
+} else if (convert_to == "kelvin"){
+  out <- celsius + 273.15
+} else {
+  out <-  celsius
+}
+  return(out)
+}
+```
+
+‣ Let's test the function:
+
+```{r}
+celsius_convert(20, "fahrenheit")
+celsius_convert(20, "kelvin")
+```
+
+‣ One problem: silent failure. If we pass in an invalid value for `convert_to`, the function fails without an informative error message.
+
+```{r}
+celsius_convert(20, "celsius")
+celsius_convert(20, "foo") 
+```
+
+‣ Will need to add some error handling to the function.
+
+::: practice
+### Debugging a Function with Conditional Logic {.unlisted .unnumbered}
+
+A function named `check_negatives` is designed to analyze a vector of numbers in R and print a message indicating whether the vector contains any negative numbers. However, the function currently has syntax errors.
+
+```{r eval = F}
+check_negatives <- function(numbers) {
+   x <- numbers
+  if (any(x < 0)) {
+    print("x contains negative numbers")
+    }
+  else {
+    print("x does not contain negative numbers")
+  }
+}
+```
+
+Identify and correct the syntax errors in the `check_negatives` function. After correcting the function, test it with the following vectors to ensure it works correctly: 1. `c(8, 3, -2, 5)` 2. `c(10, 20, 30, 40)`
+
+```{r}
+x1 <- c(8, 3, -2, 5)
+x2 <- c(10, 20, 30, 40)
+
+check_negatives(x1)
+check_negatives(x2)
+```
+
+:::
+
+## Argument Checking with Conditionals
+
+‣ Argument checking is crucial in R functions to ensure inputs are sensible.
+
+‣ Without checks, functions may return incorrect results, fail silently, or fail with an uninformative error message.
+
+‣ Example: Using `celsius_convert()` function for temperature conversion.
+
+```{r}
+celsius_convert(30, "centigrade")
+```
+
+‣ **Issue**: Fails silently when `convert_to` is not a valid temperature scale.
+
+‣ **Solution**: Implement argument checking using the `stop()` function in R.
+
+‣ Example: Validate `convert_to` argument. We'll write them out first, then integrate them into the function.
+
+```{r eval=FALSE}
+convert_to <- "bad scale"
+
+# if convert_to is not in fahrenheit, or kelvin, stop() with error message
+if (!convert_to %in% c("fahrenheit", "kelvin")){
+  stop("convert to must be one of 'fahrenheit; or 'kelvin'")
+}
+```
+
+‣ **Integration into `celsius_convert()` function**:
+
+```{r}
+celsius_convert <- function(celsius, convert_to){
+  
+  # Checking validity
+  if (!convert_to %in% c("fahrenheit", "kelvin")){
+  stop("convert to must be one of 'fahrenheit; or 'kelvin'")
+  }
+  
+  # Converting value
+  if (convert_to == "fahrenheit"){
+  out <- (celsius * 9/5) + 32
+} else if (convert_to == "kelvin"){
+  out <- celsius + 273.15
+}
+  return(out)
+}
+```
+
+‣ No longer a need for `else`, since `stop()` will halt execution if `convert_to` is not valid.
+
+‣ **Result**: Clear error message for invalid temperature scales.
+
+```{r eval = F}
+celsius_convert(30, "centigrade")
+```
+
+**PRO TIP**
+
+‣ **Balancing Argument Checking**: Checking should ensure reliability without overcomplicating the code or impacting performance.
+
+‣ You will develop a sense of the right amount of checking through experience and examining others' code. For now, note that it is usually good to err on the side of more checking.
+
+::: practice
+### Argument Checking Practice {.unlisted .unnumbered}
+
+Consider the `calculate_calories` function we wrote earlier:
+
+```{r}
+calculate_calories <- function(carb_grams = 0, protein_grams = 0, fat_grams = 0) {
+  result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+  return(result)
+}
+```
+
+Write a function called `calculate_calories2()` that is the same as `calculate_calories()` except that it checks if the `carb_grams`, `protein_grams`, and `fat_grams` arguments are numeric. If any of them are not numeric, the function should print an error message using the `stop()` function.
+
+```{r eval=FALSE}
+calculate_calories2 <- function(carb_grams = 0, protein_grams = 0, fat_grams = 0) {
+  
+  # your code here
+  if (!is.numeric(c(carb_grams, protein_grams, fat_grams))){
+    stop("All arguments must be numeric")
+} 
+  result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+  return(result)
+}
+
+calculate_calories2("five", 20, 30)
+
+```
+:::
+
+## Vectorized Conditionals
+
+‣ Important realization and source of errors: `if` statements are not vectorized and only evaluate the first element of a vector.
+
+‣ Consider this attempt at a function `classify_temp` for classifying temperature readings.
+
+```{r}
+classify_temp <- function(temp) {
+  if (temp < 35) {
+    print("hypothermia")
+  } else if (temp >= 35 & temp <= 37) {
+    print("normal")
+  } else if (temp > 37) {
+    print("fever")
+  }
+}
+```
+
+‣ Works for a single value, but not for vectors.
+
+```{r}
+classify_temp(36)
+
+temp_vec <- c(36, 37, 38)
+classify_temp(temp_vec)  # This won't work correctly
+```
+
+‣ For conditional statements for vectors, we therefore use `ifelse` or `dplyr::case_when`.
+
+```{r}
+classify_temp <- function(temp){
+ out <-  ifelse(temp < 35, "hypothermia",
+                ifelse(temp >= 35 & temp <= 37, "normal", 
+                       ifelse(temp > 37, "fever", "NA")))
+ return(out)
+}
+      # ifelse temp less than 35, return "hypothermia"
+      # nested ifelse temp between 35 and 37, return "normal"
+      # nested ifelse temp greater than 37, return "fever"
+
+classify_temp(temp_vec)  # Works for vector
+```
+
+‣ `dplyr::case_when` is a more readable alternative.
+
+```{r}
+classify_temp <- function(temp) {
+  case_when(
+    temp < 35 ~ "hypothermia",
+    temp >= 35 & temp <= 37 ~ "normal",
+    temp > 37 ~ "fever",
+    TRUE ~ NA_character_
+  )
+}
+
+classify_temp(temp_vec)  # This also works as expected
+```
+
+‣ This function can be seamlessly integrated with data frames.
+
+```{r}
+NHSRdatasets::synthetic_news_data %>% 
+  select(temp) %>%
+  mutate(temp_classif = classify_temp(temp))
+  
+```
+
+::: practice
+### Practice Classifying Dosage of Isoniazid {.unlisted .unnumbered}
+
+Let's apply this knowledge to a practical case. Consider the following attempt at writing a function that calculates dosages of the drug isoniazid for adults weighing more than 30kg:
+
+```{r}
+calculate_isoniazid_dosage <- function(weight) {
+  if (weight < 30) {
+    stop("Weight must be at least 30 kg.")
+  } else if (weight <= 35) {
+    return(150)
+  } else if (weight <= 45) {
+    return(200)
+  } else if (weight <= 55) {
+    return(300)
+  } else if (weight <= 70) {
+    return(300)
+  } else {
+    return(300)
+  }
+}
+```
+
+This function fails with a vector of weights. Your task is to write a new function `calculate_isoniazid_dosage2()` that can handle vector inputs. To ensure all weights are above 30kg, you'll use the `any()` function within your error checking.
+
+Here's a scaffold to get you started:
+
+```{r}
+calculate_isoniazid_dosage2 <- function(weight) {
+  if (any(weight < 30)) stop("Weights must all be at least 30 kg.")
+   
+  # Your code here  
+  {
+    out <- ifelse(weight <= 35, 150,
+          ifelse(weight <= 45, 200,
+                 ifelse(weight <= 55, 300,
+                        ifelse(weight <= 70, 300, 300))))
+    return(out)
+  
+  }
+  return(out)
+}
+
+calculate_isoniazid_dosage2(c(30, 40, 50, 100))  
+```
+:::
+
+# Answer Key
+
+### Age Months Function {.unlisted .unnumbered}
+
+```{r}
+years_to_months <- function(years) {
+  months <- years * 12
+  return(months)
+}
+
+# Test
+years_to_months(12)
+```
+
+### Celsius to Fahrenheit Function {.unlisted .unnumbered}
+
+```{r}
+celsius_to_fahrenheit <- function(celsius) {
+  fahrenheit <- celsius * 1.8 + 32
+  return(fahrenheit)
+}
+
+# Test
+beaver1 %>%
+  select(temp) %>%
+  mutate(Fahrenheit = celsius_to_fahrenheit(temp))
+```
+
+### BMI Function {.unlisted .unnumbered}
+
+```{r}
+calc_bmi <- function(weight, height) {
+  bmi <- weight / (height^2)
+  return(bmi)
+}
+
+# Test
+library(medicaldata)
+medicaldata::smartpill %>%
+  as_tibble() %>%
+  select(Weight, Height) %>%
+  mutate(BMI = calc_bmi(Weight, Height))
+```
+
+### Practice with the ... Argument {.unlisted .unnumbered}
+
+```{r}
+calculate_calories <- function(carb_grams, protein_grams, fat_grams, ...) {
+  result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+  result_formatted <- format(result, ...)
+  return(result)
+}
+```
+
+### Debugging a Function with Conditional Logic {.unlisted .unnumbered}
+
+```{r}
+check_negatives <- function(numbers) {
+  if (any(numbers < 0)) {
+    print("x contains negative numbers")
+  } else {
+    print("x does not contain negative numbers")
+  }
+}
+
+# Test
+check_negatives(c(8, 3, -2, 5))
+check_negatives(c(10, 20, 30, 40))
+```
+
+### Argument Checking Practice {.unlisted .unnumbered}
+
+```{r}
+calculate_calories2 <- function(carb_grams = 0, protein_grams = 0, fat_grams = 0) {
+
+  if (!is.numeric(carb_grams)) {
+    stop("carb_grams must be numeric")
+  }
+  
+  if (!is.numeric(protein_grams)) {
+    stop("protein_grams must be numeric")
+  }
+  
+  if (!is.numeric(fat_grams)) {
+    stop("fat_grams must be numeric")
+  }
+  
+  
+  result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+  return(result)
+}
+```
+
+### Practice Classifying Dosage of Isoniazid {.unlisted .unnumbered}
+
+```{r}
+calculate_isoniazid_dosage2 <- function(weight) {
+  if (any(weight < 30)) stop("Weights must all be at least 30 kg.")
+
+  dosage <- case_when(
+    weight <= 35 ~ 150,
+    weight <= 45 ~ 200,
+    weight <= 55 ~ 300,
+    weight <= 70 ~ 300,
+    TRUE ~ 300
+  )
+    return(dosage)
+}
+
+calculate_isoniazid_dosage2(c(30, 40, 50, 100))
+```
+
+# References
+
+Some material in this lesson was adapted from the following sources:
+
+‣ Barnier, Julien. “Introduction à R et au tidyverse.” Accessed May 23, 2022. [https://juba.github.io/tidyverse](https://juba.github.io/tidyverse)
+
+‣ Wickham, Hadley; Grolemund, Garrett. “R for Data Science.” Accessed May 25, 2022. [https://r4ds.had.co.nz/](https://r4ds.had.co.nz/)
