@@ -273,7 +273,7 @@ calculate_calories(carb_grams = 50, protein_grams = 25)
 
 ‣ Default values can be set for function arguments.
 
-```{r}
+```{r error=TRUE}
 calculate_calories <- function(carb_grams, protein_grams, fat_grams) {
   result <- (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
   return(result)
@@ -532,7 +532,7 @@ if (!convert_to %in% c("fahrenheit", "kelvin")){
 celsius_convert <- function(celsius, convert_to){
   
   # Checking validity
-  if (!convert_to %in% c("fahrenheit", "kelvin")){
+  if (!convert_to %in% c("fahrenheit", "kelvin", "centigrade")){
   stop("convert to must be one of 'fahrenheit; or 'kelvin'")
   }
   
@@ -541,6 +541,8 @@ celsius_convert <- function(celsius, convert_to){
   out <- (celsius * 9/5) + 32
 } else if (convert_to == "kelvin"){
   out <- celsius + 273.15
+} else if (convert_to == "centigrade"){
+  out <- celsius
 }
   return(out)
 }
@@ -704,6 +706,92 @@ calculate_isoniazid_dosage2(c(30, 40, 50, 100))
 ```
 :::
 
+# Storing your functions for future use
+
+To store your functions in R for future use, you can save them in a script or package. Here’s how:
+
+### 1. Save Functions in an R Script {.unlisted .unnumbered}
+‣ **Create a script file**:
+
+1. Open RStudio (or any text editor).
+2. Write your functions in a new script file (e.g., my_functions.R).
+3. Save the file in a desired location.
+
+‣ **Load the script**: To use the functions in future sessions, load the script using:
+
+```
+source(("path/to/my_functions.R"))
+```
+
+‣ **Example**:
+
+```{r}
+# Save this in my_functions.R
+calculate_calories <- function(carb_grams, protein_grams, fat_grams) {
+  (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+}
+```
+
+Then load the file:
+
+```{r}
+source(here("global/functions/my_functions.R"))
+calculate_calories(10, 5, 2)
+```
+
+### 2. Save Functions in an R Data File Save function objects: {.unlisted .unnumbered}
+
+‣ **Save function objects**:
+
+```{r}
+save(calculate_calories2, calc_bmi, pounds_to_kg, years_to_months, celsius_convert, calculate_isoniazid_dosage2, celsius_to_fahrenheit, fahrenheit_to_celsius, classify_temp2, file = "my_functions.RData")
+```
+
+‣ **Load the file**: In future sessions, you can load the .RData file:
+
+```{r}
+load("my_functions.RData")
+
+temp_vec <- c(36, 37, 38)
+classify_temp2(temp_vec)
+```
+
+### 3. Create a Custom R Package: {.unlisted .unnumbered}
+
+If you plan to use your functions frequently across multiple projects, creating a package is a good approach.
+
+Building packages doesn’t have to be intimidating! Thanks to the tidyverse team, getting started is simple with RStudio and the **devtools** and **usethis** packages. In this <a href="https://www.youtube.com/live/EpTkT6Rkgbs?si=rQKwbSDakAFcGilK" target="_blank">one-hour presentation</a>
+, you'll learn the fundamentals of R package development and gain the confidence to start building your own packages!
+
+‣ Click [here](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbDJuekx2ck1LeUZ3ZmJMNUNoQ1VQM0MtVWpSQXxBQ3Jtc0tsUEV3WDNjdXpLOHlvMnJLYjFJejVocGQwN3lYU0VHQ3BNYU5Pa05HQlZybGIydlZXRzJiSGRRSV9ObFpvTlJIVGc4cmxzSWprZDhxNFdQOHIyR0lZNXJBUFFCX3NpT292QkNIZHBwTXIwN1ZJN1hDcw&q=https%3A%2F%2Fcolorado.rstudio.com%2Frsc%2Fpkg-building%2F&v=EpTkT6Rkgbs){target="_blank"} for **slides**.
+
+‣ Click [here](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqazE5T1NlMVp1N1NsNnVHOTA5ZVhkQnJiYzJkZ3xBQ3Jtc0trdGJEUFZZR1J2cWtvS0dzbjJGYko1bWlsazQtcjd3ZkZJVEMzZlBXZjZJaTRQcWpSdVVDcHFGb2UtR3pvRER5VElqMkp4eDlOUU12SUhKTjRSVXVQcDF3d2tjeWVsYnFXN0dQNUFLVUhCUnl4ZW9Ocw&q=https%3A%2F%2Fgithub.com%2Fjthomasmock%2Fpkg-building&v=EpTkT6Rkgbs){target="_blank"} for **source code** 
+
+‣ Click [here](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbDAzWVB0YThlbkRQdnBiMDJqb0hoQ2ZRai1IZ3xBQ3Jtc0tsblFYYmlvZUJpSnhtS1Y3blVkS3ZQODVsMFlpU3hncm5EV3FoRFdkLV9UOHlhRXlreW8yOUZhQ2ZJVG1jQ1FPMHZSSDFzRUtpVEc1VnBkWXFreHBERmE0RUl0T3cyZTdhMFpvM3YzZHlPR2xET1NLMA&q=https%3A%2F%2Fdevtools.r-lib.org%2F&v=EpTkT6Rkgbs){target="_blank"} for more information on **devtools**
+
+‣ Click [here](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbXdiYVc1SWJjVnpTbUdFSlp0anEtS1d4UXdFUXxBQ3Jtc0tsOTJRTjFWakZkOUZ4U0NrdVFoMEd6TGlZaGREUFA0eDBMUTZEaGhSUzh5ZVI3NmdrT3RkSVYtcFFpVEJlN0xiTFVRSlZ6N0sta2NGVEs3VW1LeUtrQVpldm9rZXBVNHNvbXloaE94c0tqbWxxb2hNZw&q=https%3A%2F%2Fusethis.r-lib.org%2F&v=EpTkT6Rkgbs){target="_blank"} for more information on **usethis**
+
+‣ Click [here](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbjhjU0g1clNBZVd3UzlCbnFncjd3WGcxcGJGd3xBQ3Jtc0tsZXFCN1lrQzRrRk1FY0tLcm9JeE1VaGVtRVRrNTlsZmlza05JSWxaRC0yc3huN3V6S1FIWXJ6QmptOVNjdTZWSENtM2NxdWk0dFRNTEVXS1hFdXdacUp4QnNWdEpqbjhHTjUyTXpNNjhHNEhRRE05cw&q=https%3A%2F%2Fr-pkgs.org%2Findex.html&v=EpTkT6Rkgbs){target="_blank"} for more  resources on **R Packages book**
+
+‣ Learn how to create a package, the fundamental unit of shareable, reusable, and reproducible R code by reading and studying the 2nd edition of [R Packages](https://r-pkgs.org/){target="_blank"}, by Hadley Wickham and Jennifer Bryan 
+
+### 4. Store Functions in the Global Environment {.unlisted .unnumbered}
+ 
+
+You can also define functions in your `.Rprofile` file, so they are available every time you start R:
+
+‣ Edit your  `.Rprofil`e:
+
+```{r eval=FALSE}
+file.edit("~/.Rprofile")
+```
+
+‣ Add your function definitions to the file.
+
+‣ Save and restart your R session to access the functions.
+
+**Choose the method that best fits your workflow and the frequency of use for your functions!**
+
 # Answer Key
 
 ### Age Months Function {.unlisted .unnumbered}
@@ -823,3 +911,5 @@ Some material in this lesson was adapted from the following sources:
 ‣ Barnier, Julien. “Introduction à R et au tidyverse.” Accessed May 23, 2022. [https://juba.github.io/tidyverse](https://juba.github.io/tidyverse)
 
 ‣ Wickham, Hadley; Grolemund, Garrett. “R for Data Science.” Accessed May 25, 2022. [https://r4ds.had.co.nz/](https://r4ds.had.co.nz/)
+
+‣ Wickham, Hadley; Jennifer Bryan. “R Packages (2e).” Accessed Nov 20, 2024.[R Packages (2e)](https://r-pkgs.org/){target="_blank"}
