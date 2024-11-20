@@ -775,6 +775,9 @@ Building packages doesn’t have to be intimidating! Thanks to the tidyverse tea
 
 ‣ Learn how to create a package, the fundamental unit of shareable, reusable, and reproducible R code by reading and studying the 2nd edition of [R Packages](https://r-pkgs.org/){target="_blank"}, by Hadley Wickham and Jennifer Bryan 
 
+‣ This [youtube video: How to Create Your Own Package in RStudio](https://youtu.be/rsQoEgWeJMk?si=j2B5SY_k_4kVqVHT){target="_blank"} is also helpful in creating your own package and storing in GitHub.
+
+
 ### 4. Store Functions in the Global Environment {.unlisted .unnumbered}
  
 
